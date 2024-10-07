@@ -1,5 +1,8 @@
 from tree import Tree
-class BTNode:
+from typing import Generic, Hashable, TypeVar
+VT = TypeVar("VT")
+ET = TypeVar("ET")
+class BTNode(Generic[VT]):
     lrp=(0,1,-1)
     def __init__(self,data=None,lc=None,rc=None,pr=None):
         """
@@ -8,7 +11,7 @@ class BTNode:
         - rc: the right child of the node
         - pr: the parent of the node
         """
-        self.data=data
+        self.data:VT = data
         self.lc=lc
         self.rc=rc
         self.pr=pr
@@ -42,7 +45,7 @@ class BTNode:
                 pos=next
                 i+=1
         return pos
-class BTree():
+class BTree(Generic[VT]):
     def __init__(self,json:dict=None,root=None):
         """
         根据json生成树，或者直接传入root
@@ -59,7 +62,7 @@ class BTree():
             return
         def mktree(json:dict,parent=None):
             if(json is None):return None
-            root=BTNode(data=json.get("data"))
+            root=BTNode[VT](data=json.get("data"))
             root.lc=mktree(json=json.get("lc"),parent=root)
             root.rc=mktree(json=json.get("rc"),parent=root)
             root.pr=parent
@@ -70,7 +73,7 @@ class BTree():
         use retraction to show the tree
         """
         print("-"*15,"Tree","-"*15)
-        def puttree(node:BTNode,deep):
+        def puttree(node:BTNode[VT],deep):
             if node is None: return
             print(" "*4*deep,"@",node.data)
             puttree(node.lc,deep+1)
@@ -90,7 +93,7 @@ class BTree():
         """
         return the tree depth
         """
-        def treedeep(node:BTNode):
+        def treedeep(node:BTNode[VT]):
             if node is None:return 0
             return max(treedeep(node.lc),treedeep(node.rc))+1
         return treedeep(self.root)
@@ -108,7 +111,7 @@ class BTree():
         """
         lst=[]
         order={"mid":(1,0,2),"pre":(0,1,2),"post":(1,2,0)}[order]
-        def addlist(node:BTNode):
+        def addlist(node:BTNode[VT]):
             if node is None: return
             actions=[lambda :lst.append(node.data),lambda :addlist(node.lc),lambda:addlist(node.rc)]
             for i in order:
@@ -120,7 +123,7 @@ class BTree():
         convert the btree to a tree object
         """
         tree=Tree()
-        def mktree(node:BTNode):
+        def mktree(node:BTNode[VT]):
             if node is None :return None
             root=tree.add_nameless_vex(node.data)
             lc,rc=mktree(node.lc),mktree(node.rc)
@@ -148,8 +151,8 @@ class BTree():
         - tree2 : the right tree
         - data : the data of the root of the new tree
         """
-        node=BTNode(data,tree1.root,tree2.root)
-        return BTree(root=node)
+        node=BTNode[VT](data,tree1.root,tree2.root)
+        return BTree[VT](root=node)
 class SortTree(BTree):
     def __init__(self, json=None, root:BTNode=None,cmp=(lambda x,y:x<y),equ=(lambda x,y:x==y)):
         """

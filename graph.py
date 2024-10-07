@@ -1,10 +1,12 @@
-from typing import Any,Iterable,Hashable
+from typing import Any,Iterable,Hashable,TypeVar,Generic
 import random
-class Edge:
-    def __init__(self,i1:Hashable,i2:Hashable,data=None) -> None:
+ET = TypeVar("ET")
+VT = TypeVar("VT")
+class Edge(Generic[ET]):
+    def __init__(self,i1:Hashable,i2:Hashable,data: ET=None) -> None:
         self.i1=i1
         self.i2=i2
-        self.data=data
+        self.data:ET =data
     def __hash__(self) -> int:
         """
         parallel edges is not allowed,so if you add a edge between i1,i2 
@@ -13,7 +15,7 @@ class Edge:
         Edge's i1-i2 can't be modified
         """
         return (self.i1,self.i2).__hash__()
-class DiGraph:
+class DiGraph(Generic[ET, VT]):
     ID = 0
     @staticmethod
     def idmaker(exists:set[Hashable],maxid=int(1e7),continual = True):
@@ -40,8 +42,8 @@ class DiGraph:
         """
         self.order=order
         self.init_order()
-        self.vexs={}    #vertex
-        self.adjs:dict[Hashable,(set|list)[Edge]]={} #adjacent edges
+        self.vexs:dict[Hashable, VT]={}    #vertex
+        self.adjs:dict[Hashable,(set|list)[Edge[ET]]]={} #adjacent edges
         self.add_vexs(vexs)
         self.add_edges(edges)
     def init_order(self):
@@ -239,7 +241,7 @@ def test_iter():
     
 
 def test_add_graph():
-    graph = DiGraph(order=True,vexs=[[1,2],[2,3],[3,8],[4,5]],edges=[[1,2,3],[2,3,4],[3,1,9],[4,1,0],[4,2,1]])
+    graph = DiGraph[int,int](order=True,vexs=[[1,2],[2,3],[3,8],[4,5]],edges=[[1,2,3],[2,3,4],[3,1,9],[4,1,0],[4,2,1]])
     graph2 = DiGraph(order=True,vexs=[[1,2],[2,3],[3,8],[4,5]],edges=[[1,2,3],[2,3,4]])
 
     print("graph1: ")
