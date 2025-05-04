@@ -116,6 +116,50 @@ class Tree(DiGraph):
                 for sub in subs:
                     yield from iter_node(sub.i2)
         return iter_node(self.root)
+
+    def is_leaf(self,i):
+        """
+        judge if node is leaf
+        - i :id of the node
+        # return
+        bool
+        """ 
+        return len(self.get_adj(i))==0
+    
+    def get_leaf_range(self, i):
+        """
+        get the range of leafs of node i
+        - i :id of the node
+        # return
+        [start,end)
+        """
+        assert i is not None and self.root is not None
+        num_start_end = [0, -1, -1]
+        def before(x):
+            if x==i:
+                num_start_end[1] = num_start_end[0]
+            if self.is_leaf(x):
+                num_start_end[0] += 1 
+        def after(x):
+            if x==i:
+                num_start_end[2] = num_start_end[0]
+        self.dfs(self.root, before, after)
+        return num_start_end[1:]
+    
+    def dfs(self,i, before = lambda x: print("before", x), after = lambda x: print("after", x)):
+        """
+        depth first search
+        - i :id of the begin node
+        - before:function to execute before visit node
+        - after:function to execute after visit node
+        # returns
+        (id,data)
+        """
+        before(i)
+        for sub in self.get_adj(i):
+            self.dfs(sub.i2,before,after)
+        after(i)
+
     def iter_ancestor(self,i):
         """
         iter ancestors
@@ -126,6 +170,7 @@ class Tree(DiGraph):
         while i is not None:
             yield i,self.get_vex(i)
             i = self.parents[i]
+
     def iter_sub(self,i,order = "pre"):
         """
         iter subtree in order
@@ -190,7 +235,6 @@ class Tree(DiGraph):
                 return ancestors0
             else :
                 ancestors0.pop(0)
-
 
     def remove_sub(self, i):
         """
@@ -338,9 +382,18 @@ def test_common_ancestors():
     t.show()
     print(t.common_ancestors(["bfc","ba"]))
 
-
+def test_get_leaf_range():
+    json = {
+        "g":{"a":{"ac":6},"b":{"ba":{"bc":6,"abc":6,"bfc":6,"bcf":6}},"c":{"ca":1,"cb":1}}
+    }
+    t = Tree(order=True)
+    t.from_dict(json,root="root")
+    t.show()
+    print(t.is_leaf("ba"))
+    print(t.is_leaf("bc"))
+    print(t.get_leaf_range("ba"))
 
 if __name__=="__main__":
-    test_copy()
+    test_get_leaf_range()
 
  
